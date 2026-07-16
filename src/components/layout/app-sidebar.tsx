@@ -48,7 +48,12 @@ export function AppSidebar({
   return (
     <aside className="flex h-full w-64 flex-col border-r border-border bg-card">
       <div className="border-b border-border px-4 py-4">
-        <p className="text-sm font-medium text-muted-foreground">JourneyOS</p>
+        <Link
+          href="/"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          ← JourneyOS.nl
+        </Link>
         <p className="truncate text-lg font-semibold text-foreground">{organizationName}</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
