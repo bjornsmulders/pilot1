@@ -15,7 +15,7 @@ returns table (organization_name text, role organization_role, email citext)
 language sql
 stable
 security definer
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
   select o.name, i.role, i.email
   from public.invitations i
@@ -34,7 +34,7 @@ create function public.accept_invitation(invitation_token text)
 returns public.organization_members
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
 declare
   current_user_id uuid := auth.uid();
@@ -92,4 +92,8 @@ comment on function public.accept_invitation is 'Valideert een uitnodigingstoken
 grant execute on function public.accept_invitation(text) to authenticated;
 
 -- pgcrypto's digest() is used above for the sha-256 hash (consistent with the
--- application-side hashToken() in src/lib/tokens.ts).
+-- application-side hashToken() in src/lib/tokens.ts). Supabase installs
+-- pgcrypto into the "extensions" schema rather than "public", so that schema
+-- must be on search_path for these two SECURITY DEFINER functions -- unlike
+-- gen_random_uuid(), which is a core PostgreSQL 13+ builtin and needs no
+-- extension/schema at all.
