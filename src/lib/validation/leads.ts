@@ -57,8 +57,17 @@ export type LeadActivityInput = z.infer<typeof leadActivitySchema>;
 // worden serverside afgeleid) en met een honeypot-veld tegen eenvoudige bots.
 export const publicLeadSchema = z.object({
   name: z.string().trim().min(2, "Vul een naam in."),
-  email: z.string().trim().toLowerCase().email("Vul een geldig e-mailadres in."),
-  phone: z.string().trim().max(50).optional().or(z.literal("")),
+  // Telefoonnummer is hier bewust verplicht (i.p.v. e-mail): het product is
+  // WhatsApp-centrisch, dus dit is het kanaal waarop een organisator iemand
+  // het snelst kan bereiken. E-mail blijft optioneel als extra kanaal.
+  phone: z.string().trim().min(6, "Vul een telefoonnummer in (voor WhatsApp/bellen)."),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Vul een geldig e-mailadres in.")
+    .optional()
+    .or(z.literal("")),
   desiredPeriod: z.string().trim().max(100).optional().or(z.literal("")),
   message: z.string().trim().max(2000).optional().or(z.literal("")),
   whatsappConsent: z.coerce.boolean().default(false),

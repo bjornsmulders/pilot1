@@ -350,7 +350,7 @@ export async function submitPublicLeadAction(
 ): Promise<ActionState> {
   const parsed = publicLeadSchema.safeParse({
     name: formData.get("name"),
-    email: formData.get("email"),
+    email: formData.get("email") ?? "",
     phone: formData.get("phone") ?? "",
     desiredPeriod: formData.get("desiredPeriod") ?? "",
     message: formData.get("message") ?? "",
@@ -374,7 +374,7 @@ export async function submitPublicLeadAction(
   const { error } = await supabase.rpc("submit_public_lead", {
     retreat_public_slug: publicSlug,
     lead_name: parsed.data.name,
-    lead_email: parsed.data.email,
+    lead_email: parsed.data.email || null,
     lead_phone: parsed.data.phone || null,
     lead_desired_period: parsed.data.desiredPeriod || null,
     lead_message: parsed.data.message || null,

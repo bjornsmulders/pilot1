@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import {
   Table,
@@ -36,11 +37,12 @@ export function RetreatTable({ retreats }: { retreats: RetreatListItem[] }) {
             <TableHead>Capaciteit</TableHead>
             <TableHead>Prijs p.p.</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {retreats.map((retreat) => (
-            <TableRow key={retreat.id} className="cursor-pointer">
+            <TableRow key={retreat.id} className="cursor-pointer hover:bg-muted/50">
               <TableCell className="font-medium">
                 <Link href={`/retreats/${retreat.id}`} className="hover:underline">
                   {retreat.title}
@@ -51,12 +53,39 @@ export function RetreatTable({ retreats }: { retreats: RetreatListItem[] }) {
                   </Badge>
                 )}
               </TableCell>
-              <TableCell>{formatDateRange(retreat.start_date, retreat.end_date)}</TableCell>
-              <TableCell>{retreat.location || "—"}</TableCell>
-              <TableCell>{retreat.capacity}</TableCell>
-              <TableCell>{formatCurrencyEUR(retreat.price_per_person)}</TableCell>
-              <TableCell>
-                <RetreatStatusBadge status={retreat.status} />
+              <TableCell className="p-0">
+                <Link href={`/retreats/${retreat.id}`} className="block p-3">
+                  {formatDateRange(retreat.start_date, retreat.end_date)}
+                </Link>
+              </TableCell>
+              <TableCell className="p-0">
+                <Link href={`/retreats/${retreat.id}`} className="block p-3">
+                  {retreat.location || "—"}
+                </Link>
+              </TableCell>
+              <TableCell className="p-0">
+                <Link href={`/retreats/${retreat.id}`} className="block p-3">
+                  {retreat.capacity}
+                </Link>
+              </TableCell>
+              <TableCell className="p-0">
+                <Link href={`/retreats/${retreat.id}`} className="block p-3">
+                  {formatCurrencyEUR(retreat.price_per_person)}
+                </Link>
+              </TableCell>
+              <TableCell className="p-0">
+                <Link href={`/retreats/${retreat.id}`} className="block p-3">
+                  <RetreatStatusBadge status={retreat.status} />
+                </Link>
+              </TableCell>
+              <TableCell className="p-0">
+                <Link
+                  href={`/retreats/${retreat.id}`}
+                  aria-label="Bekijken"
+                  className="flex items-center justify-center p-3"
+                >
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
               </TableCell>
             </TableRow>
           ))}

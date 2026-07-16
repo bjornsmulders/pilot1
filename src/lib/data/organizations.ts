@@ -52,6 +52,21 @@ export async function listTeamMembers(organizationId: string): Promise<TeamMembe
   });
 }
 
+/**
+ * Voor de publieke organisatorpagina (/o/[orgSlug]). Geen `requireRole` --
+ * anonieme bezoekers mogen dit zien. Gaat via `get_public_organization`, die
+ * alleen naam/logo/website teruggeeft, nooit contactgegevens of interne data.
+ */
+export async function getPublicOrganization(orgSlug: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_public_organization", {
+    org_slug: orgSlug,
+  });
+
+  if (error) throw error;
+  return data?.[0] ?? null;
+}
+
 export interface PendingInvitationRow {
   id: string;
   email: string;

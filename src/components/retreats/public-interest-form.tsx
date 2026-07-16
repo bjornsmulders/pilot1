@@ -63,14 +63,18 @@ export function PublicInterestForm({ action }: { action: BoundAction }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">E-mailadres</Label>
-            <Input id="email" name="email" type="email" required />
-            {err("email") && <p className="text-sm text-destructive">{err("email")}</p>}
+            <Label htmlFor="phone">Telefoonnummer (WhatsApp)</Label>
+            <Input id="phone" name="phone" type="tel" placeholder="06 12345678" required />
+            <p className="text-xs text-muted-foreground">
+              We nemen het liefst via WhatsApp contact op — dit is het belangrijkste veld.
+            </p>
+            {err("phone") && <p className="text-sm text-destructive">{err("phone")}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefoon (optioneel)</Label>
-            <Input id="phone" name="phone" />
+            <Label htmlFor="email">E-mailadres (optioneel)</Label>
+            <Input id="email" name="email" type="email" />
+            {err("email") && <p className="text-sm text-destructive">{err("email")}</p>}
           </div>
 
           <div className="space-y-2">

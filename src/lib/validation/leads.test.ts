@@ -31,7 +31,7 @@ describe("publicLeadSchema", () => {
   const validInput = {
     name: "Marie de Vries",
     email: "marie@example.com",
-    phone: "",
+    phone: "0612345678",
     desiredPeriod: "voorjaar 2026",
     message: "Ik ben erg geïnteresseerd!",
     whatsappConsent: true,
@@ -44,9 +44,14 @@ describe("publicLeadSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("vereist een e-mailadres (in tegenstelling tot het interne leadSchema)", () => {
-    const result = publicLeadSchema.safeParse({ ...validInput, email: "" });
+  it("vereist een telefoonnummer (WhatsApp-centrisch product)", () => {
+    const result = publicLeadSchema.safeParse({ ...validInput, phone: "" });
     expect(result.success).toBe(false);
+  });
+
+  it("staat een leeg e-mailadres toe (optioneel, i.t.t. telefoonnummer)", () => {
+    const result = publicLeadSchema.safeParse({ ...validInput, email: "" });
+    expect(result.success).toBe(true);
   });
 
   it("laat een ingevuld honeypot-veld door de schemavalidatie heen (afhandeling gebeurt in de server action, niet hier)", () => {

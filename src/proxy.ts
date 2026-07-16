@@ -23,6 +23,8 @@ const PUBLIC_PATHS = [
   "/contact",
   "/privacy",
   "/retreat",
+  "/ontdek",
+  "/o",
 ];
 
 function isPublicPath(pathname: string) {

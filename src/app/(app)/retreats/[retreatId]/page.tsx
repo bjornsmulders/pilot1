@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { CalendarDays, Megaphone, Star } from "lucide-react";
 
 import { getActiveMembership, getCurrentUser } from "@/lib/auth/session";
 import { getRetreat } from "@/lib/data/retreats";
@@ -9,6 +11,7 @@ import { updateRetreatAction } from "@/actions/retreats";
 import { RetreatForm } from "@/components/retreats/retreat-form";
 import { RetreatStatusBadge } from "@/components/retreats/retreat-status-badge";
 import { PublicLinkCard } from "@/components/retreats/public-link-card";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrencyEUR, formatDateRange } from "@/lib/format";
 
@@ -95,6 +98,27 @@ export default async function RetreatDetailPage({
           url={`${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/retreat/${retreat.public_slug}`}
         />
       )}
+
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link href={`/retreats/${retreat.id}/programma`}>
+            <CalendarDays className="h-4 w-4" />
+            Programma
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link href={`/retreats/${retreat.id}/mededelingen`}>
+            <Megaphone className="h-4 w-4" />
+            Mededelingen
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link href={`/retreats/${retreat.id}/reviews`}>
+            <Star className="h-4 w-4" />
+            Reviews
+          </Link>
+        </Button>
+      </div>
 
       {canManage ? (
         <div>

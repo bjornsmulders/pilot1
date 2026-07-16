@@ -244,6 +244,74 @@ export type AlumniMembershipRow = {
   updated_at: string;
 };
 
+export type ScheduleItemRow = {
+  id: string;
+  organization_id: string;
+  retreat_id: string;
+  title: string;
+  description: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  location: string | null;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AnnouncementRow = {
+  id: string;
+  organization_id: string;
+  retreat_id: string;
+  title: string;
+  body: string;
+  visible_to_participants: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReviewRow = {
+  id: string;
+  organization_id: string;
+  retreat_id: string;
+  author_name: string;
+  rating: number;
+  body: string | null;
+  is_published: boolean;
+  moderated_by: string | null;
+  moderated_at: string | null;
+  created_at: string;
+};
+
+export type PublicReviewRow = {
+  id: string;
+  author_name: string;
+  rating: number;
+  body: string | null;
+  created_at: string;
+};
+
+export type PaymentRow = {
+  id: string;
+  organization_id: string;
+  participant_id: string;
+  retreat_id: string;
+  type: "aanbetaling" | "volledige_betaling" | "overig";
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  provider: "mollie" | "handmatig";
+  mollie_payment_id: string | null;
+  checkout_url: string | null;
+  paid_at: string | null;
+  refunded_amount: number;
+  idempotency_key: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type MessageTemplateRow = {
   id: string;
   organization_id: string;
@@ -255,6 +323,49 @@ export type MessageTemplateRow = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type PublicRetreatDetailRow = {
+  id: string;
+  public_slug: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  country: string | null;
+  start_date: string;
+  end_date: string;
+  capacity: number;
+  price_per_person: number;
+  cover_image_url: string | null;
+  status: RetreatStatus;
+  metadata: Record<string, unknown>;
+  organization_name: string;
+  organization_slug: string;
+  organization_contact_phone: string | null;
+};
+
+export type PublicRetreatListingRow = {
+  id: string;
+  public_slug: string;
+  organization_name: string;
+  organization_slug: string;
+  title: string;
+  location: string | null;
+  country: string | null;
+  start_date: string;
+  end_date: string;
+  capacity: number;
+  price_per_person: number;
+  cover_image_url: string | null;
+  status: RetreatStatus;
+};
+
+export type PublicOrganizationRow = {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  website: string | null;
 };
 
 export type PlatformMatchingCandidateRow = {
@@ -327,6 +438,10 @@ export type Database = {
       lead_activities: TableDef<LeadActivityRow>;
       participants: TableDef<ParticipantRow>;
       participant_consents: TableDef<ParticipantConsentRow>;
+      payments: TableDef<PaymentRow>;
+      schedule_items: TableDef<ScheduleItemRow>;
+      announcements: TableDef<AnnouncementRow>;
+      reviews: TableDef<ReviewRow>;
       alumni_memberships: TableDef<AlumniMembershipRow>;
       message_templates: TableDef<MessageTemplateRow>;
       message_deliveries: TableDef<MessageDeliveryRow>;
@@ -384,6 +499,31 @@ export type Database = {
       platform_overview_stats: {
         Args: Record<string, never>;
         Returns: PlatformOverviewStatsRow[];
+      };
+      get_public_retreat: {
+        Args: { retreat_public_slug: string };
+        Returns: PublicRetreatDetailRow[];
+      };
+      list_public_retreats: {
+        Args: { filter_org_slug: string | null };
+        Returns: PublicRetreatListingRow[];
+      };
+      get_public_organization: {
+        Args: { org_slug: string };
+        Returns: PublicOrganizationRow[];
+      };
+      submit_public_review: {
+        Args: {
+          retreat_public_slug: string;
+          author_name: string;
+          rating: number;
+          body: string | null;
+        };
+        Returns: undefined;
+      };
+      list_public_reviews: {
+        Args: { retreat_public_slug: string };
+        Returns: PublicReviewRow[];
       };
     };
   };

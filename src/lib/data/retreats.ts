@@ -81,22 +81,36 @@ export async function getRetreat(organizationId: string, retreatId: string) {
 
 /**
  * Haalt een retreat op voor de openbare retreatpagina. Geen `requireMembership`
- * -- dit mag door een anonieme bezoeker aangeroepen worden. Leunt op de
- * `retreats_public_select` RLS-policy, die alleen retreats teruggeeft die de
- * organisator expliciet openbaar heeft gezet (zie de migratie
- * 20260716123526_public_retreat_pages_and_consent_type.sql). Geen
- * organization_id-check nodig: de policy is de enige toegangscontrole hier.
+ * -- dit mag door een anonieme bezoeker aangeroepen worden. Gaat via de
+ * `get_public_retreat`-RPC (zie
+ * supabase/migrations/20260716150000_public_marketplace_and_org_pages.sql),
+ * die zelf opnieuw controleert dat het retreat openbaar/actief is en de
+ * organisatienaam/contactnummer meegeeft zonder anon brede leestoegang tot
+ * `organizations` te hoeven geven.
  */
 export async function getPublicRetreat(publicSlug: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("retreats")
-    .select("*")
-    .eq("public_slug", publicSlug)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("get_public_retreat", {
+    retreat_public_slug: publicSlug,
+  });
 
   if (error) throw error;
-  return data;
+  return data?.[0] ?? null;
+}
+
+/**
+ * Voedt zowel de centrale ontdekpagina (/ontdek, geen filter) als de publieke
+ * organisatorpagina (/o/[orgSlug], met filter). Zie ADR-0008 in
+ * docs/decisions.md voor waarom dit platformbreed leesbaar is.
+ */
+export async function listPublicRetreats(orgSlug?: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_public_retreats", {
+    filter_org_slug: orgSlug ?? null,
+  });
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 export interface OrganizationDashboardStats {

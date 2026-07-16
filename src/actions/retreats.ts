@@ -31,11 +31,24 @@ function retreatFromFormData(formData: FormData) {
     bookingDeadline: formData.get("bookingDeadline") ?? "",
     internalNotes: formData.get("internalNotes") ?? "",
     coverImageUrl: formData.get("coverImageUrl") ?? "",
+    galleryImageUrls: formData.get("galleryImageUrls") ?? "",
+    extraInfo: formData.get("extraInfo") ?? "",
   });
 }
 
 function newPublicSlug(title: string) {
   return slugWithSuffix(title, Math.random().toString(36).slice(2, 8));
+}
+
+function metadataFromParsed(data: { galleryImageUrls?: string; extraInfo?: string }) {
+  const galleryImageUrls = (data.galleryImageUrls ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return {
+    gallery_image_urls: galleryImageUrls,
+    extra_info: data.extraInfo || null,
+  };
 }
 
 export async function createRetreatAction(
@@ -74,6 +87,7 @@ export async function createRetreatAction(
       cover_image_url: parsed.data.coverImageUrl || null,
       public_slug:
         parsed.data.enrollmentVisibility === "openbaar" ? newPublicSlug(parsed.data.title) : null,
+      metadata: metadataFromParsed(parsed.data),
       created_by: userData.user?.id ?? null,
     })
     .select("id")
@@ -151,6 +165,7 @@ export async function updateRetreatAction(
       internal_notes: parsed.data.internalNotes || null,
       cover_image_url: parsed.data.coverImageUrl || null,
       public_slug: publicSlug ?? null,
+      metadata: metadataFromParsed(parsed.data),
     })
     .eq("id", retreatId);
 

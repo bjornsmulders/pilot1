@@ -20,6 +20,13 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { RetreatRow } from "@/lib/supabase/database.types";
 
+function metadataString(retreat: RetreatRow | undefined, key: string): string {
+  if (!retreat) return "";
+  const value = retreat.metadata?.[key];
+  if (Array.isArray(value)) return value.join("\n");
+  return typeof value === "string" ? value : "";
+}
+
 type BoundAction = (state: ActionState, formData: FormData) => Promise<ActionState>;
 
 export function RetreatForm({
@@ -183,6 +190,39 @@ export function RetreatForm({
             {err("coverImageUrl") && (
               <p className="text-sm text-destructive">{err("coverImageUrl")}</p>
             )}
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="galleryImageUrls">Extra foto&rsquo;s voor de galerij</Label>
+            <Textarea
+              id="galleryImageUrls"
+              name="galleryImageUrls"
+              rows={3}
+              placeholder={"https://...\nhttps://...\nhttps://..."}
+              defaultValue={metadataString(retreat, "gallery_image_urls")}
+            />
+            <p className="text-xs text-muted-foreground">
+              Eén link per regel. Deze foto&rsquo;s verschijnen als galerij onder de
+              coverafbeelding op de openbare retreatpagina.
+            </p>
+            {err("galleryImageUrls") && (
+              <p className="text-sm text-destructive">{err("galleryImageUrls")}</p>
+            )}
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="extraInfo">Extra info / inspiratie</Label>
+            <Textarea
+              id="extraInfo"
+              name="extraInfo"
+              rows={4}
+              placeholder="Wat maakt dit retreat bijzonder? Wat is inbegrepen? Praktische tips..."
+              defaultValue={metadataString(retreat, "extra_info")}
+            />
+            <p className="text-xs text-muted-foreground">
+              Wordt getoond als apart blok op de openbare retreatpagina, onder de
+              omschrijving.
+            </p>
           </div>
 
           <div className="space-y-2">

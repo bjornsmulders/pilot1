@@ -55,8 +55,31 @@ export const retreatSchema = z
       .url("Vul een geldige URL in.")
       .optional()
       .or(z.literal("")),
+    galleryImageUrls: z.string().trim().max(4000).optional().or(z.literal("")),
+    extraInfo: z.string().trim().max(4000).optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
+    if (data.galleryImageUrls) {
+      const invalid = data.galleryImageUrls
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .find((line) => {
+          try {
+            new URL(line);
+            return false;
+          } catch {
+            return true;
+          }
+        });
+      if (invalid) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Ongeldige URL: "${invalid}". Zet elke link op een eigen regel.`,
+          path: ["galleryImageUrls"],
+        });
+      }
+    }
     if (new Date(data.endDate) < new Date(data.startDate)) {
       ctx.addIssue({
         code: "custom",
