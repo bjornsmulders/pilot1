@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Settings, Tent } from "lucide-react";
+import { LayoutDashboard, Settings, Tent, ListChecks, Users, Shuffle } from "lucide-react";
 
 import { signOutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import type { OrganizationRole } from "@/lib/supabase/database.types";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/retreats", label: "Retreats", icon: Tent },
+  { href: "/leads", label: "Leads", icon: ListChecks },
+  { href: "/deelnemers", label: "Deelnemers", icon: Users },
   { href: "/instellingen/organisatie", label: "Instellingen", icon: Settings },
 ];
 
@@ -29,11 +31,20 @@ export function AppSidebar({
   organizationName,
   userFullName,
   role,
+  isPlatformAdmin = false,
 }: {
   organizationName: string;
   userFullName: string;
   role: OrganizationRole;
+  isPlatformAdmin?: boolean;
 }) {
+  const navItems = isPlatformAdmin
+    ? [
+        ...NAV_ITEMS,
+        { href: "/platform", label: "Platform", icon: Shuffle },
+      ]
+    : NAV_ITEMS;
+
   return (
     <aside className="flex h-full w-64 flex-col border-r border-border bg-card">
       <div className="border-b border-border px-4 py-4">
@@ -41,7 +52,7 @@ export function AppSidebar({
         <p className="truncate text-lg font-semibold text-foreground">{organizationName}</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <Button key={item.href} asChild variant="ghost" className="justify-start gap-2">
             <Link href={item.href}>
               <item.icon className="h-4 w-4" />

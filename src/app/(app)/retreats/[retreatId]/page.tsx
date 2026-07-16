@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updateRetreatAction } from "@/actions/retreats";
 import { RetreatForm } from "@/components/retreats/retreat-form";
 import { RetreatStatusBadge } from "@/components/retreats/retreat-status-badge";
+import { PublicLinkCard } from "@/components/retreats/public-link-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrencyEUR, formatDateRange } from "@/lib/format";
 
@@ -88,6 +89,12 @@ export default async function RetreatDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {retreat.public_slug && retreat.enrollment_visibility === "openbaar" && (
+        <PublicLinkCard
+          url={`${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/retreat/${retreat.public_slug}`}
+        />
+      )}
 
       {canManage ? (
         <div>

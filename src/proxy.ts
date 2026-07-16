@@ -17,6 +17,12 @@ const PUBLIC_PATHS = [
   "/wachtwoord-resetten",
   "/auth/callback",
   "/uitnodiging",
+  "/functies",
+  "/voor-organisatoren",
+  "/prijzen",
+  "/contact",
+  "/privacy",
+  "/retreat",
 ];
 
 function isPublicPath(pathname: string) {

@@ -49,6 +49,22 @@ export async function listRetreats(
   }));
 }
 
+export async function listRetreatOptions(
+  organizationId: string
+): Promise<{ id: string; title: string }[]> {
+  await requireMembership(organizationId);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("retreats")
+    .select("id, title")
+    .eq("organization_id", organizationId)
+    .is("archived_at", null)
+    .order("start_date", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getRetreat(organizationId: string, retreatId: string) {
   await requireMembership(organizationId);
   const supabase = await createClient();
@@ -57,6 +73,26 @@ export async function getRetreat(organizationId: string, retreatId: string) {
     .select("*")
     .eq("organization_id", organizationId)
     .eq("id", retreatId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Haalt een retreat op voor de openbare retreatpagina. Geen `requireMembership`
+ * -- dit mag door een anonieme bezoeker aangeroepen worden. Leunt op de
+ * `retreats_public_select` RLS-policy, die alleen retreats teruggeeft die de
+ * organisator expliciet openbaar heeft gezet (zie de migratie
+ * 20260716123526_public_retreat_pages_and_consent_type.sql). Geen
+ * organization_id-check nodig: de policy is de enige toegangscontrole hier.
+ */
+export async function getPublicRetreat(publicSlug: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("retreats")
+    .select("*")
+    .eq("public_slug", publicSlug)
     .maybeSingle();
 
   if (error) throw error;

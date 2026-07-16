@@ -8,6 +8,7 @@ import { requireRole, requireMembership } from "@/lib/auth/session";
 import { canManageRetreat } from "@/lib/auth/permissions";
 import { AuthorizationError } from "@/lib/auth/errors";
 import { retreatSchema } from "@/lib/validation/retreats";
+import { slugWithSuffix } from "@/lib/slug";
 import {
   type ActionState,
   errorState,
@@ -29,7 +30,12 @@ function retreatFromFormData(formData: FormData) {
     enrollmentVisibility: formData.get("enrollmentVisibility") || "besloten",
     bookingDeadline: formData.get("bookingDeadline") ?? "",
     internalNotes: formData.get("internalNotes") ?? "",
+    coverImageUrl: formData.get("coverImageUrl") ?? "",
   });
+}
+
+function newPublicSlug(title: string) {
+  return slugWithSuffix(title, Math.random().toString(36).slice(2, 8));
 }
 
 export async function createRetreatAction(
@@ -65,6 +71,9 @@ export async function createRetreatAction(
       enrollment_visibility: parsed.data.enrollmentVisibility,
       booking_deadline: parsed.data.bookingDeadline || null,
       internal_notes: parsed.data.internalNotes || null,
+      cover_image_url: parsed.data.coverImageUrl || null,
+      public_slug:
+        parsed.data.enrollmentVisibility === "openbaar" ? newPublicSlug(parsed.data.title) : null,
       created_by: userData.user?.id ?? null,
     })
     .select("id")
@@ -114,6 +123,17 @@ export async function updateRetreatAction(
     );
   }
 
+  const { data: currentRetreat } = await supabase
+    .from("retreats")
+    .select("public_slug")
+    .eq("id", retreatId)
+    .maybeSingle();
+
+  const publicSlug =
+    parsed.data.enrollmentVisibility === "openbaar" && !currentRetreat?.public_slug
+      ? newPublicSlug(parsed.data.title)
+      : currentRetreat?.public_slug;
+
   const { error } = await supabase
     .from("retreats")
     .update({
@@ -129,6 +149,8 @@ export async function updateRetreatAction(
       enrollment_visibility: parsed.data.enrollmentVisibility,
       booking_deadline: parsed.data.bookingDeadline || null,
       internal_notes: parsed.data.internalNotes || null,
+      cover_image_url: parsed.data.coverImageUrl || null,
+      public_slug: publicSlug ?? null,
     })
     .eq("id", retreatId);
 

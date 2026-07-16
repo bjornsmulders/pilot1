@@ -99,13 +99,28 @@ export const getCurrentProfile = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, is_platform_admin")
     .eq("id", user.id)
     .maybeSingle();
 
   if (error) throw error;
   return data;
 });
+
+/**
+ * JourneyOS-platformbeheer (niet een organisatierol) -- zie
+ * supabase/migrations/20260716123500_platform_matching.sql en ADR-0007 in
+ * docs/decisions.md. `is_platform_admin` is nu alleen handmatig in de database
+ * te zetten, er is bewust geen UI om jezelf platformbeheerder te maken.
+ */
+export async function requirePlatformAdmin() {
+  const user = await requireUser();
+  const profile = await getCurrentProfile();
+  if (!profile?.is_platform_admin) {
+    throw new AuthorizationError("Alleen platformbeheerders hebben hier toegang.");
+  }
+  return user;
+}
 
 /** Eerste (oudste) organisatie van de gebruiker. Pilot-vereenvoudiging: geen
  * org-switcher in slice 1 — organisatoren beheren doorgaans één organisatie. */

@@ -49,6 +49,12 @@ export const retreatSchema = z
         "Vul een geldige boekingsdeadline in."
       ),
     internalNotes: z.string().trim().max(4000).optional().or(z.literal("")),
+    coverImageUrl: z
+      .string()
+      .trim()
+      .url("Vul een geldige URL in.")
+      .optional()
+      .or(z.literal("")),
   })
   .superRefine((data, ctx) => {
     if (new Date(data.endDate) < new Date(data.startDate)) {

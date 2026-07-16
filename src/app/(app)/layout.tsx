@@ -22,6 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         organizationName={membership.organization.name}
         userFullName={profile?.full_name || "Onbekende gebruiker"}
         role={membership.role}
+        isPlatformAdmin={profile?.is_platform_admin ?? false}
       />
       <main className="flex-1 overflow-y-auto bg-background p-6 sm:p-8">{children}</main>
     </div>

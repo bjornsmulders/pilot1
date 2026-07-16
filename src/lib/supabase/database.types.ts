@@ -22,6 +22,34 @@ export type RetreatStatus =
   | "vol"
   | "afgerond"
   | "geannuleerd";
+export type LeadStatus =
+  | "nieuw"
+  | "geinteresseerd"
+  | "warm"
+  | "gesprek_gepland"
+  | "geboekt"
+  | "verloren";
+export type BookingStatus =
+  | "optie"
+  | "gereserveerd"
+  | "bevestigd"
+  | "geannuleerd"
+  | "aanwezig"
+  | "no_show";
+export type PaymentStatus =
+  | "niet_betaald"
+  | "gedeeltelijk_betaald"
+  | "betaald"
+  | "mislukt"
+  | "terugbetaald"
+  | "geannuleerd";
+export type ConsentType =
+  | "verwerking_uitvoering"
+  | "zichtbaar_voor_deelnemers"
+  | "alumni_activiteiten"
+  | "marketing_organisator"
+  | "marketing_journeyos"
+  | "laatste_kans_aanbiedingen";
 
 export type OrganizationRow = {
   id: string;
@@ -49,6 +77,7 @@ export type ProfileRow = {
   phone: string | null;
   avatar_url: string | null;
   locale: string;
+  is_platform_admin: boolean;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -125,6 +154,158 @@ export type AuditLogRow = {
   created_at: string;
 };
 
+export type LeadRow = {
+  id: string;
+  organization_id: string;
+  retreat_id: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  source: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  desired_period: string | null;
+  destination: string | null;
+  budget_range: string | null;
+  party_size: number | null;
+  whatsapp_consent: boolean;
+  marketing_consent: boolean;
+  platform_matching_consent: boolean;
+  status: LeadStatus;
+  follow_up_date: string | null;
+  notes: string | null;
+  score: number;
+  is_waitlisted: boolean;
+  converted_participant_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LeadActivityRow = {
+  id: string;
+  lead_id: string;
+  organization_id: string;
+  activity_type: string;
+  description: string | null;
+  score_delta: number;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type ParticipantRow = {
+  id: string;
+  organization_id: string;
+  retreat_id: string;
+  lead_id: string | null;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  booking_status: BookingStatus;
+  payment_status: PaymentStatus;
+  onboarding_status: "niet_gestart" | "gestart" | "voltooid";
+  invitation_status: "niet_verzonden" | "verzonden" | "geopend" | "voltooid" | "verlopen" | "ingetrokken";
+  source: string | null;
+  referral_code_used: string | null;
+  internal_notes: string | null;
+  is_alumnus: boolean;
+  anonymized_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ParticipantConsentRow = {
+  id: string;
+  participant_id: string;
+  organization_id: string;
+  consent_type: ConsentType;
+  granted: boolean;
+  source: string;
+  policy_version: string;
+  granted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+};
+
+export type AlumniMembershipRow = {
+  id: string;
+  organization_id: string;
+  participant_id: string;
+  home_region: string | null;
+  interests: string[];
+  became_alumnus_at: string;
+  reactivated_at: string | null;
+  status: "actief" | "inactief";
+  created_at: string;
+  updated_at: string;
+};
+
+export type MessageTemplateRow = {
+  id: string;
+  organization_id: string;
+  key: string;
+  name: string;
+  channel: "whatsapp" | "email";
+  body: string;
+  is_default: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PlatformMatchingCandidateRow = {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  retreat_id: string | null;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  status: LeadStatus;
+  created_at: string;
+};
+
+export type PlatformMatchingRetreatRow = {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  capacity: number;
+  price_per_person: number;
+  status: RetreatStatus;
+};
+
+export type PlatformOverviewStatsRow = {
+  total_organizations: number;
+  total_retreats: number;
+  active_retreats: number;
+  total_leads: number;
+  leads_last_30_days: number;
+  total_participants: number;
+  platform_matching_candidates: number;
+  platform_introductions: number;
+};
+
+export type MessageDeliveryRow = {
+  id: string;
+  organization_id: string;
+  participant_id: string | null;
+  lead_id: string | null;
+  template_id: string | null;
+  channel: "whatsapp_link" | "email" | "mock";
+  rendered_preview: string | null;
+  status: "voorbereid" | "gekopieerd" | "geopend_in_whatsapp" | "verzonden_bevestigd" | "mislukt";
+  sent_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type TableDef<Row> = {
   Row: Row;
   Insert: Partial<Row>;
@@ -142,6 +323,13 @@ export type Database = {
       retreats: TableDef<RetreatRow>;
       retreat_team_members: TableDef<RetreatTeamMemberRow>;
       audit_logs: TableDef<AuditLogRow>;
+      leads: TableDef<LeadRow>;
+      lead_activities: TableDef<LeadActivityRow>;
+      participants: TableDef<ParticipantRow>;
+      participant_consents: TableDef<ParticipantConsentRow>;
+      alumni_memberships: TableDef<AlumniMembershipRow>;
+      message_templates: TableDef<MessageTemplateRow>;
+      message_deliveries: TableDef<MessageDeliveryRow>;
     };
     Views: {
       participant_current_consents: {
@@ -166,6 +354,36 @@ export type Database = {
       preview_invitation: {
         Args: { invitation_token: string };
         Returns: { organization_name: string; role: OrganizationRole; email: string }[];
+      };
+      submit_public_lead: {
+        Args: {
+          retreat_public_slug: string;
+          lead_name: string;
+          lead_email: string | null;
+          lead_phone: string | null;
+          lead_desired_period: string | null;
+          lead_message: string | null;
+          lead_whatsapp_consent: boolean;
+          lead_marketing_consent: boolean;
+          lead_platform_matching_consent: boolean;
+        };
+        Returns: undefined;
+      };
+      list_platform_matching_candidates: {
+        Args: Record<string, never>;
+        Returns: PlatformMatchingCandidateRow[];
+      };
+      list_platform_matching_retreats: {
+        Args: Record<string, never>;
+        Returns: PlatformMatchingRetreatRow[];
+      };
+      introduce_lead_to_retreat: {
+        Args: { source_lead_id: string; target_retreat_id: string };
+        Returns: LeadRow;
+      };
+      platform_overview_stats: {
+        Args: Record<string, never>;
+        Returns: PlatformOverviewStatsRow[];
       };
     };
   };

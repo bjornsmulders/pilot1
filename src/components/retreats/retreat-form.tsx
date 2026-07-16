@@ -167,6 +167,24 @@ export function RetreatForm({
             </Select>
           </div>
 
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="coverImageUrl">Coverafbeelding (URL)</Label>
+            <Input
+              id="coverImageUrl"
+              name="coverImageUrl"
+              type="url"
+              placeholder="https://…"
+              defaultValue={retreat?.cover_image_url ?? ""}
+            />
+            <p className="text-xs text-muted-foreground">
+              Plak een link naar een afbeelding (bijv. van je eigen website).
+              Wordt gebruikt op de openbare retreatpagina.
+            </p>
+            {err("coverImageUrl") && (
+              <p className="text-sm text-destructive">{err("coverImageUrl")}</p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="bookingDeadline">Boekingsdeadline</Label>
             <Input
