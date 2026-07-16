@@ -100,4 +100,34 @@ benaderd te worden) — twee aparte, expliciete opt-ins. Alleen deelnemers met
 functie mogen voorkomen, en nooit via automatische data-deling tussen organisaties.
 **Gevolg**: dit is een aparte, toekomstige productbeslissing (met eigen AVG-analyse,
 verwerkingsgrondslag en UI-copy) zodra er voldoende schaal/pilotorganisaties zijn —
-geen sluipende scope-uitbreiding van de huidige pilot.
+geen sluipende scope-uitbreiding van de huidige pilot. **Vervolg (dezelfde sessie)**:
+de gebruiker vroeg door en koos ervoor dit ín de pilot te bouwen, maar bewust smaller
+en platform-gemedieerd: geen directe cross-tenant toegang tussen organisatoren, wel
+een los, expliciet `leads.platform_matching_consent` en een JourneyOS-platformbeheer-
+rol (`profiles.is_platform_admin`) die handmatig, één voor één, introduceert. Zie
+`supabase/migrations/20260716123500_platform_matching.sql` en `docs/security.md`.
+
+## ADR-0008 — Publieke marktplaats (`/ontdek`) en organisatorpagina's (`/o/[orgSlug]`)
+
+**Status**: geaccepteerd — expliciete koerswijziging t.o.v. de oorspronkelijke opdracht.
+**Context**: de oorspronkelijke opdracht sloot een "publieke internationale
+marktplaats" uit. De gebruiker vroeg expliciet (na een duidelijke waarschuwing
+over deze eerdere scope-uitsluiting) om dit alsnog te bouwen: één centrale
+JourneyOS-pagina met open retreats van alle organisatoren samen, plus een
+publieke pagina per organisator met al hun eigen openbare retreats.
+**Beslissing**: gebouwd als `/ontdek` (platformbrede lijst) en `/o/[orgSlug]`
+(per-organisator lijst), beide gevoed door de nieuwe `list_public_retreats(...)`-
+en `get_public_organization(...)`-RPC's
+(`supabase/migrations/20260716150000_public_marketplace_and_org_pages.sql`).
+Geen nieuwe RLS-policy nodig op `retreats` — de al bestaande
+`retreats_public_select`-policy was al platformbreed (geen organisatiefilter),
+dus dit was al technisch mogelijk zodra men de juiste query schreef. De nieuwe
+RPC's geven bewust een smalle projectie terug (geen interne velden, geen brede
+leestoegang tot `organizations`) i.p.v. een nieuwe permissieve policy op
+`organizations` zelf.
+**Gevolg**: elk `openbaar`-gezet retreat met een `public_slug` is vanaf nu
+platformbreed vindbaar, niet meer alleen via de link die de organisator zelf
+deelt. Organisatoren die dat niet willen, zetten `enrollment_visibility` op
+`besloten`. Dit is een bewuste, door de gebruiker genomen productbeslissing,
+geen technisch toeval — zie ook de bijgestelde "buiten scope"-sectie in
+`docs/product-requirements.md`.

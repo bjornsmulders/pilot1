@@ -81,6 +81,21 @@ introduceren bij een onderbezet retreat van een ándere organisatie.
   individuele rijen. Geeft nul rijen terug als de aanroeper geen
   `is_platform_admin` is.
 
+### Publieke marktplaats en organisatorpagina's (`public_marketplace_and_org_pages.sql`)
+Zie ADR-0008 in `docs/decisions.md`. Geen nieuwe tabellen/kolommen — drie
+RPC's die de al bestaande `retreats_public_select`-RLS-policy (platformbreed,
+geen organisatiefilter) bevragen en een smalle, veilige projectie teruggeven:
+- `get_public_retreat(retreat_public_slug)` — voedt `/retreat/[publicSlug]`,
+  incl. organisatienaam/-slug/contacttelefoonnummer (voor de WhatsApp-knop).
+- `list_public_retreats(filter_org_slug default null)` — voedt zowel `/ontdek`
+  (geen filter) als `/o/[orgSlug]` (met filter).
+- `get_public_organization(org_slug)` — naam/logo/website voor `/o/[orgSlug]`,
+  zonder brede anon-leestoegang tot `organizations` te hoeven geven.
+Retreats gebruiken daarnaast `metadata.gallery_image_urls` (string[]) en
+`metadata.extra_info` (tekst) voor extra foto's/inspiratie op de publieke
+pagina — bewust in de al bestaande `metadata jsonb`-kolom, geen nieuwe
+migratie nodig.
+
 ### Deelnemers en onboarding (`participant_tables.sql`, `onboarding_tables.sql`)
 - **participants** — boekings-/betaal-/onboarding-/uitnodigingsstatus, koppeling naar
   `retreats` en optioneel `leads` (conversie).
@@ -91,6 +106,31 @@ introduceren bij een onderbezet retreat van een ándere organisatie.
 - **onboarding_forms / onboarding_questions / onboarding_answers** — configureerbare
   extra vragen per retreat, bovenop de vaste, sterk getypeerde velden in
   `travel_plans`/`dietary_requirements`/`room_assignments`.
+
+### Deelnemers (module D, app-laag afgerond)
+- **participants** — boekings-/betaal-/onboarding-/uitnodigingsstatus per retreat.
+  CRUD, filters en CSV-export in `/deelnemers`; coordinator-scoping identiek aan
+  retreats/leads (alleen toegewezen retreats).
+- **payments** — handmatige betalingsregistratie (`provider = 'handmatig'`, nog
+  geen live Mollie-koppeling — zie ADR-0006/toekomstige ADR). Alleen owner/admin
+  mogen registreren (coordinator leest, schrijft niet — ADR-0005); registreren
+  van een `volledige_betaling`/`aanbetaling` werkt automatisch
+  `participants.payment_status` bij.
+
+### Programma, mededelingen en reviews (module F, "voor/tijdens/na")
+- **schedule_items / announcements** — al bestaande tabellen (uit
+  `schedule_and_files_tables.sql`), nu met CRUD-UI onder
+  `/retreats/[retreatId]/programma` en `/mededelingen`. Zelfde
+  can_access_retreat/can_manage_retreat-RLS-patroon als retreats.
+- **reviews** (nieuw, `reviews.sql`) — reviews per retreat. Nieuwe rijen zijn
+  ongepubliceerd (`is_published = false`) totdat een staflid ze publiceert op
+  `/retreats/[retreatId]/reviews`. Indienen gaat via de publieke, ongeauthenticeerde
+  functie `submit_public_review(retreat_public_slug, author_name, rating, body)`
+  — bewust géén statusfilter op het retreat (i.t.t. `submit_public_lead`), want
+  reviews horen juist ná afloop te komen. `list_public_reviews(retreat_public_slug)`
+  geeft alleen gepubliceerde reviews terug, getoond op `/retreat/[publicSlug]`.
+- **files** (Supabase Storage-metadata) — tabel + RLS bestaan al, maar nog geen
+  upload-UI; bewust uitgesteld (aparte scope: Storage-bucket-configuratie).
 
 ### Logistiek (`logistics_tables.sql`)
 - **travel_plans** — vervoerstype, vertrekplaats, luchthaven, vlucht, aankomst/vertrek,

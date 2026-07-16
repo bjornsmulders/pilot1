@@ -38,11 +38,18 @@ in gebruiksintensiteit, niet in aparte code-paden.
 
 ## Buiten scope (pilot)
 
-Publieke internationale marktplaats, native app, interne chat, automatische analyse
-of scraping van WhatsApp, onofficiële WhatsApp-automatisering, complexe
-AI-aanbevelingen, vliegticketboekingen, boekhoudintegraties, communityfeeds,
-medische dossiers, complexe deelnemersabonnementen, multi-currency, meertaligheid,
-automatische groepscreatie zonder officiële WhatsApp-toegang.
+Native app, interne chat, automatische analyse of scraping van WhatsApp,
+onofficiële WhatsApp-automatisering, complexe AI-aanbevelingen,
+vliegticketboekingen, boekhoudintegraties, communityfeeds, medische dossiers,
+complexe deelnemersabonnementen, multi-currency, meertaligheid, automatische
+groepscreatie zonder officiële WhatsApp-toegang.
+
+**Bijgesteld (zie ADR-0008 in `docs/decisions.md`)**: een publieke, platformbrede
+marktplaats (`/ontdek` + organisatorpagina's `/o/[orgSlug]`) stond hier
+oorspronkelijk als "publieke internationale marktplaats" buiten scope, maar is
+op expliciet verzoek van de gebruiker alsnog gebouwd — bewust beperkt tot
+Nederland/EUR (consistent met de rest van de pilot), platformbreed leesbaar,
+zonder cross-tenant schrijftoegang.
 
 ## Kernmodules
 

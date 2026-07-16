@@ -23,6 +23,16 @@ communiceren.
   tenzij ooit aantoonbaar officiële toegang (WhatsApp Business/Cloud API)
   beschikbaar is.
 
+## Directe WhatsApp-aanmelding op de openbare retreatpagina
+
+Op `/retreat/[publicSlug]` staat (indien de organisatie een `contact_phone`
+heeft ingesteld) een knop "Meld je aan via WhatsApp" naast het interesseformulier
+— een kant-en-klare `wa.me/<nummer>?text=<vooraf-ingevulde-tekst>`-link
+(`src/lib/whatsapp.ts`, `buildWaLink`). Dezelfde link-only aanpak als de rest van
+deze strategie: geen API-call, geen automatische verwerking van het antwoord. Het
+interesseformulier zelf vraagt telefoonnummer als verplicht veld (i.p.v.
+e-mailadres) omdat dat voor de organisator het bruikbaarste kanaal is.
+
 ## Standaardtemplates
 
 Geseed per organisatie (`message_templates`, `is_default = true`), door de
