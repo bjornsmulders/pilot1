@@ -26,7 +26,11 @@ export async function listTeamMembers(organizationId: string): Promise<TeamMembe
 
   const { data, error } = await supabase
     .from("organization_members")
-    .select("id, role, status, created_at, profiles(id, full_name)")
+    // organization_members heeft twee foreign keys naar profiles (profile_id
+    // én invited_by), dus PostgREST kan de relatie niet automatisch afleiden
+    // zonder de "!profile_id"-hint -- anders faalt dit met PGRST201
+    // ("more than one relationship was found").
+    .select("id, role, status, created_at, profiles!profile_id(id, full_name)")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: true })
     .returns<RawTeamMemberRow[]>();
