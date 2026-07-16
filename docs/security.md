@@ -53,6 +53,22 @@ Deze matrix is 1-op-1 geïmplementeerd in zowel `src/lib/auth/permissions.ts`
 (server-side) als de RLS-policies (database) — bij wijzigingen altijd beide
 aanpassen en de tests in `src/lib/auth/permissions.test.ts` bijwerken.
 
+## Platformbeheer (super user), los van de organisatierollen
+
+`profiles.is_platform_admin` is geen organisatierol en staat niet in de matrix
+hierboven — het is een platformbreed vlag voor JourneyOS zelf (de exploitant),
+alleen handmatig in de database te zetten. Het geeft toegang tot `/platform`
+(aggregaat-dashboard: aantallen organisaties/retreats/leads, geen individuele
+rijen) en `/platform/laatste-kans` (de platformbrede "laatste kans"-matching, zie
+ADR-0007 in `docs/decisions.md`). Ook hier geldt de twee-lagen-regel: de
+server-side check (`requirePlatformAdmin()` in `src/lib/auth/session.ts`) én de
+`is_platform_admin()`-Postgresfunctie binnen elke betrokken `SECURITY DEFINER`-RPC
+controleren onafhankelijk van elkaar. Organisatoren (zelfs Owner) krijgen nooit
+toegang tot deze routes of tot leads/deelnemers van een andere organisatie —
+een introductie via de matching-module verloopt altijd via een nieuwe, op
+zichzelf staande lead-rij in de doelorganisatie, nooit via gedeelde toegang tot
+de bronrij.
+
 ## Secrets en tokens
 
 - Wachtwoorden: volledig beheerd door Supabase Auth (nooit zelf gehasht/opgeslagen).

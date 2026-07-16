@@ -21,7 +21,7 @@ een generieke trigger (`set_updated_at`).
 | `lead_status` | nieuw, geinteresseerd, warm, gesprek_gepland, geboekt, verloren |
 | `booking_status` | optie, gereserveerd, bevestigd, geannuleerd, aanwezig, no_show |
 | `payment_status` | niet_betaald, gedeeltelijk_betaald, betaald, mislukt, terugbetaald, geannuleerd |
-| `consent_type` | verwerking_uitvoering, zichtbaar_voor_deelnemers, alumni_activiteiten, marketing_organisator, marketing_journeyos |
+| `consent_type` | verwerking_uitvoering, zichtbaar_voor_deelnemers, alumni_activiteiten, marketing_organisator, marketing_journeyos, laatste_kans_aanbiedingen |
 
 ## Tabellen per domein
 
@@ -43,11 +43,43 @@ een generieke trigger (`set_updated_at`).
 - **retreat_team_members** — wijst coordinators toe aan specifieke retreats; bepaalt
   hun RLS-scope.
 
-### Leads (`lead_tables.sql`)
-- **leads** — naam, contact, gewenst retreat, UTM, bestemming, budget, toestemmingen,
-  status, score, `is_waitlisted`.
+### Leads (`lead_tables.sql`, uitgebreid in `public_retreat_pages_and_consent_type.sql`)
+- **leads** — naam, contact, gewenst retreat, UTM, bestemming, budget, toestemmingen
+  (`whatsapp_consent`, `marketing_consent`, `platform_matching_consent`), status,
+  score, `is_waitlisted`.
 - **lead_activities** — append-only activiteitenlog; som van `score_delta` = leadscore.
   Score is uitsluitend gebaseerd op expliciete acties, nooit op privéberichten.
+- **Openbare retreatpagina + interesseformulier**: `retreats.public_slug` +
+  een permissieve `retreats_public_select`-RLS-policy voor `anon`/`authenticated`
+  maken `/retreat/[publicSlug]` mogelijk. De enige weg voor een anonieme bezoeker
+  om een lead aan te maken is de `SECURITY DEFINER`-functie
+  `submit_public_lead(...)`, die zelf herverifieert dat het retreat openbaar en
+  actief is.
+
+### Platformbrede "laatste kans"-matching (`platform_matching.sql`)
+Zie ADR-0007 in `docs/decisions.md`. Geen automatische cross-tenant datadeling —
+alleen een JourneyOS-platformbeheerder (`profiles.is_platform_admin`) kan
+handmatig, één voor één, een lead met `platform_matching_consent = true`
+introduceren bij een onderbezet retreat van een ándere organisatie.
+- **profiles.is_platform_admin** — boolean, standaard `false`. Alleen handmatig in
+  de database te zetten; geen UI om jezelf platformbeheerder te maken.
+- **leads.platform_matching_consent** — expliciete, aparte opt-in (los van
+  `marketing_consent`, dat per-organisator geldt).
+- **platform_lead_matches** — audittrail van introducties;
+  `unique(source_lead_id, target_retreat_id)` voorkomt dubbele introducties.
+- RPC's `list_platform_matching_candidates()` / `list_platform_matching_retreats()`
+  geven een bewust smalle projectie terug (incl. organisatienaam, geen interne
+  velden); `introduce_lead_to_retreat(source_lead_id, target_retreat_id)` maakt een
+  gewone, op zichzelf staande lead aan bij de doelorganisatie — zonder de
+  whatsapp/marketing-toestemmingen van de bronlead over te nemen, want die golden
+  alleen voor de bronorganisatie. Alle drie zijn alleen functioneel voor
+  `is_platform_admin() = true`; organisatoren krijgen nooit rechtstreekse
+  querytoegang tot leads/deelnemers van een andere organisatie.
+- `platform_overview_stats()` — platformbreed dashboard voor de super user
+  (`/platform`): alleen aggregaten/tellingen (aantal organisaties, retreats,
+  leads, deelnemers, matching-kandidaten, gedane introducties), nooit
+  individuele rijen. Geeft nul rijen terug als de aanroeper geen
+  `is_platform_admin` is.
 
 ### Deelnemers en onboarding (`participant_tables.sql`, `onboarding_tables.sql`)
 - **participants** — boekings-/betaal-/onboarding-/uitnodigingsstatus, koppeling naar

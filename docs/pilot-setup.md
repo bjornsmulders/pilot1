@@ -36,6 +36,30 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
+## 3b. Inloggen met Google (optioneel)
+
+JourneyOS ondersteunt inloggen/registreren met Google naast e-mail+wachtwoord.
+Dit vereist geen extra environment variables in de app zelf — Supabase
+verzorgt de hele OAuth-uitwisseling. Eenmalige configuratie:
+
+1. Ga naar [Google Cloud Console](https://console.cloud.google.com/) → maak
+   (of hergebruik) een project → **APIs & Services → OAuth consent screen**.
+   Kies "External", vul een app-naam en contact-e-mailadres in.
+2. Ga naar **APIs & Services → Credentials → Create Credentials → OAuth
+   client ID**. Type: **Web application**.
+3. Bij **Authorized redirect URIs** vul je de callback-URL van je Supabase-
+   project in: `https://<project-ref>.supabase.co/auth/v1/callback` (te
+   vinden in Supabase → Authentication → Providers → Google, daar staat 'm
+   al kant-en-klaar om te kopiëren).
+4. Kopieer de gegenereerde **Client ID** en **Client secret**.
+5. Ga in Supabase naar **Authentication → Providers → Google**, zet 'm aan,
+   plak de Client ID en Client secret, en sla op.
+6. Zorg dat **Authentication → URL Configuration → Site URL** en
+   **Redirect URLs** het productiedomein bevatten (zie hierboven).
+
+Daarna verschijnt de knop "Doorgaan met Google" op de login- en
+registratiepagina's en werkt hij direct, zonder app-herdeploy.
+
 ## 4. Seed-data
 
 ```bash

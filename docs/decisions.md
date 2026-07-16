@@ -80,3 +80,24 @@ Playwright end-to-end-runs zijn een handmatige vervolgstap voor de gebruiker, zo
 er een Supabase-project + credentials zijn. Zie `docs/pilot-setup.md`.
 **Gevolg**: dit is de belangrijkste openstaande "handmatige configuratie" in het
 eindrapport van slice 1.
+
+## ADR-0007 — Geen platformbrede deelnemerspool (marktplaats-netwerkeffect), voorlopig
+
+**Status**: overwogen, bewust uitgesteld.
+**Context**: de gebruiker vroeg of JourneyOS de totale deelnemersdatabase over alle
+organisatoren heen kan laten groeien, zodat nieuwe organisatoren profiteren van een
+bestaande pool geïnteresseerden (netwerkeffect). Dit staat op gespannen voet met twee
+eerdere, expliciete eisen: "geen publieke marktplaats" (scope-uitsluiting in de
+oorspronkelijke opdracht) en de tenant-isolatie (RLS) die deelnemersdata strikt per
+organisatie scoped — data van organisator A mag nooit stilzwijgend zichtbaar worden
+voor organisator B.
+**Beslissing**: geen platformbrede pool bouwen in de pilot. Wel is er al een
+databasemodel-opening voor later: `consent_type` bevat naast
+`marketing_organisator` (toestemming om door déze organisator benaderd te worden)
+ook `marketing_journeyos` (toestemming om door JourneyOS zelf, platformbreed,
+benaderd te worden) — twee aparte, expliciete opt-ins. Alleen deelnemers met
+`marketing_journeyos`-toestemming zouden ooit in een gedeelde matching-/introductie-
+functie mogen voorkomen, en nooit via automatische data-deling tussen organisaties.
+**Gevolg**: dit is een aparte, toekomstige productbeslissing (met eigen AVG-analyse,
+verwerkingsgrondslag en UI-copy) zodra er voldoende schaal/pilotorganisaties zijn —
+geen sluipende scope-uitbreiding van de huidige pilot.
