@@ -1,0 +1,89 @@
+# WhatsApp-strategie (module G)
+
+## Uitgangspunt
+
+JourneyOS bouwt **geen WhatsApp-vervanger** en **geen onofficiële automatisering**.
+Geen browserscraping, geen ongeautoriseerde bots, geen automatische analyse van
+privégesprekken. WhatsApp blijft het kanaal; JourneyOS is de assistent die de
+organisator helpt om sneller, consistenter en zonder kopieerwerk-uit-Excel te
+communiceren.
+
+## Wat JourneyOS wél doet
+
+- Berichttemplates beheren (met variabelen zoals `{{voornaam}}`, `{{retreat}}`,
+  `{{onboarding_link}}`).
+- Een bericht vooraf invullen op basis van een template + deelnemergegevens.
+- Een `wa.me`-link genereren met de vooraf ingevulde, correct URL-geëncodeerde tekst.
+- Het bericht laten kopiëren en/of WhatsApp (web/app) openen.
+- De verzendstatus **handmatig** laten registreren door de organisator
+  (`message_deliveries.status`): voorbereid → gekopieerd → geopend in WhatsApp →
+  verzonden bevestigd (of mislukt).
+- Groepsuitnodigingsteksten en groepsberichten voorbereiden als tekst — het
+  daadwerkelijk aanmaken van een WhatsApp-groep gebeurt door de organisator zelf,
+  tenzij ooit aantoonbaar officiële toegang (WhatsApp Business/Cloud API)
+  beschikbaar is.
+
+## Standaardtemplates
+
+Geseed per organisatie (`message_templates`, `is_default = true`), door de
+organisator zelf te bewerken: welkom, onboarding invullen, reisgegevens ontbreken,
+dieetwensen ontbreken, betaling ontbreekt, programma gewijzigd, eten is klaar,
+activiteit start binnenkort, feedback invullen, fotoalbum delen, early access
+volgend retreat, uitnodiging alumni-event, referralverzoek.
+
+## `MessageProvider`-interface
+
+```ts
+// src/lib/messaging/types.ts
+export interface PrepareMessageInput {
+  templateKey: string
+  variables: Record<string, string>
+  recipient: { name: string; phone?: string; email?: string }
+}
+
+export interface PreparedMessage {
+  body: string           // volledig ingevulde tekst
+  channel: 'whatsapp_link' | 'email' | 'mock'
+  waLink?: string         // alleen voor whatsapp_link
+}
+
+export interface MessageProvider {
+  prepareMessage(input: PrepareMessageInput): Promise<PreparedMessage>
+  recordDelivery(input: {
+    organizationId: string
+    participantId?: string
+    leadId?: string
+    templateId?: string
+    channel: PreparedMessage['channel']
+    status: 'voorbereid' | 'gekopieerd' | 'geopend_in_whatsapp' | 'verzonden_bevestigd' | 'mislukt'
+  }): Promise<void>
+}
+```
+
+Implementaties (`src/lib/messaging/`):
+
+- **`MockMessageProvider`** — voor tests en lokale ontwikkeling zonder externe
+  afhankelijkheden; slaat niets extern op, gebruikt voor Vitest.
+- **`WhatsAppLinkProvider`** — bouwt de `wa.me/<nummer>?text=<encoded>`-link. Geen
+  verzending, geen API-call naar Meta. Alleen linkgeneratie + status-registratie.
+- **`EmailMessageProvider`** — verstuurt via Resend wanneer de organisator e-mail
+  kiest in plaats van WhatsApp voor hetzelfde template.
+
+Alle drie implementeren dezelfde interface, zodat de UI en de server actions nooit
+weten (of hoeven te weten) welk kanaal actief is.
+
+### Uitbreidbaar naar WhatsApp Cloud API
+
+Wanneer een organisator aantoonbaar officiële toegang heeft (Meta Business
+verificatie + WhatsApp Cloud API-token), kan een `WhatsAppCloudApiProvider` worden
+toegevoegd die dezelfde `MessageProvider`-interface implementeert en `recordDelivery`
+automatisch bijwerkt op basis van échte delivery-webhooks, in plaats van handmatige
+registratie. Geen enkele aanroepende code (server actions, UI) hoeft daarvoor te
+wijzigen — dat is precies waarom de interface nu al zo is opgezet.
+
+## Wat nooit wordt opgeslagen
+
+- De volledige inhoud van verzonden/ontvangen WhatsApp-berichten.
+- Automatisch geanalyseerde gespreksdata.
+- Alleen een korte, ingekorte `rendered_preview` (max. 500 tekens) wordt bewaard, en
+  uitsluitend zodat de organisator later kan zien wélk bericht bij welke actie hoorde.
