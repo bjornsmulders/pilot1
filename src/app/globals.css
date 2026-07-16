@@ -1,0 +1,157 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * JourneyOS-thema: warm wit, donkergroen, zand- en natuurtinten.
+ * Professioneel en rustig, mobiel bruikbaar, desktop geoptimaliseerd.
+ * Zie docs/architecture.md voor de designrichtlijnen.
+ */
+:root {
+  --background: #faf8f3;
+  --foreground: #1f2b24;
+
+  --card: #ffffff;
+  --card-foreground: #1f2b24;
+
+  --popover: #ffffff;
+  --popover-foreground: #1f2b24;
+
+  --primary: #234d3a;
+  --primary-foreground: #f6f4ec;
+
+  --secondary: #e9e2d0;
+  --secondary-foreground: #2c3a30;
+
+  --muted: #f1ece0;
+  --muted-foreground: #5e6b60;
+
+  --accent: #d9cdae;
+  --accent-foreground: #2c3a30;
+
+  --destructive: #a3372c;
+  --destructive-foreground: #fdf5f2;
+
+  --success: #2f6f4e;
+  --success-foreground: #f2f9f4;
+
+  --warning: #a86a1d;
+  --warning-foreground: #fdf6ea;
+
+  --border: #e2dac4;
+  --input: #e2dac4;
+  --ring: #234d3a;
+
+  --radius: 0.65rem;
+}
+
+:root[data-theme="dark"] {
+  --background: #131b16;
+  --foreground: #eee9db;
+
+  --card: #182019;
+  --card-foreground: #eee9db;
+
+  --popover: #182019;
+  --popover-foreground: #eee9db;
+
+  --primary: #7fb89a;
+  --primary-foreground: #10261c;
+
+  --secondary: #26302a;
+  --secondary-foreground: #eee9db;
+
+  --muted: #202822;
+  --muted-foreground: #a3ad9f;
+
+  --accent: #3a4437;
+  --accent-foreground: #eee9db;
+
+  --destructive: #e2887a;
+  --destructive-foreground: #2c120d;
+
+  --success: #8fc9a6;
+  --success-foreground: #0f2417;
+
+  --warning: #e0b167;
+  --warning-foreground: #2b1c05;
+
+  --border: #2b352d;
+  --input: #2b352d;
+  --ring: #7fb89a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #131b16;
+    --foreground: #eee9db;
+    --card: #182019;
+    --card-foreground: #eee9db;
+    --popover: #182019;
+    --popover-foreground: #eee9db;
+    --primary: #7fb89a;
+    --primary-foreground: #10261c;
+    --secondary: #26302a;
+    --secondary-foreground: #eee9db;
+    --muted: #202822;
+    --muted-foreground: #a3ad9f;
+    --accent: #3a4437;
+    --accent-foreground: #eee9db;
+    --destructive: #e2887a;
+    --destructive-foreground: #2c120d;
+    --success: #8fc9a6;
+    --success-foreground: #0f2417;
+    --warning: #e0b167;
+    --warning-foreground: #2b1c05;
+    --border: #2b352d;
+    --input: #2b352d;
+    --ring: #7fb89a;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: var(--color-ring);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  ::selection {
+    background: var(--color-accent);
+  }
+}
