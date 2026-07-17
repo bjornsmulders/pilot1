@@ -23,6 +23,19 @@ communiceren.
   tenzij ooit aantoonbaar officiële toegang (WhatsApp Business/Cloud API)
   beschikbaar is.
 
+## Berichtenassistent (module G, app-laag afgerond)
+
+`/instellingen/berichten` (owner/admin) beheert `message_templates`
+(sleutel/naam/kanaal/tekst met `{{voornaam}}`/`{{retreat}}`-variabelen). Op de
+lead- en deelnemerdetailpagina kiest een staflid een template; `MessageComposer`
+rendert 'm live (`src/lib/messaging.ts`, `renderTemplate`) en toont een "Open in
+WhatsApp"-knop (`buildWaLink`). Bij klikken opent de eigen WhatsApp van de
+organisator mét vooraf ingevulde tekst, en wordt tegelijk een `message_deliveries`-
+rij gelogd (`status = 'geopend_in_whatsapp'`) als handmatige verzendregistratie —
+geen automatische deliverystatus, want er is geen WhatsApp-API-koppeling.
+Autorisatie is hier strenger dan de RLS-ondergrens: coordinator alleen voor
+toegewezen retreats, viewer nooit (zie `docs/security.md`).
+
 ## Directe WhatsApp-aanmelding op de openbare retreatpagina
 
 Op `/retreat/[publicSlug]` staat (indien de organisatie een `contact_phone`

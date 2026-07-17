@@ -132,6 +132,21 @@ migratie nodig.
 - **files** (Supabase Storage-metadata) — tabel + RLS bestaan al, maar nog geen
   upload-UI; bewust uitgesteld (aparte scope: Storage-bucket-configuratie).
 
+### Veilige onboarding (module E, app-laag afgerond)
+- **participant_invites** — nu ook daadwerkelijk gebruikt: een staflid genereert
+  via `issueParticipantInviteAction` een link (`/deelnemer/[token]`, zelfde
+  token/hash-patroon als teamuitnodigingen). Deelnemer opent de link zonder
+  in te loggen; alle lezen/schrijven loopt via twee `SECURITY DEFINER`-RPC's
+  (`preview_onboarding_invite`, `submit_onboarding` in
+  `participant_onboarding.sql`) die de token hashen/valideren — zie het
+  "Vervolg" bij ADR-0002 in `docs/decisions.md`.
+- Onboarding vult **travel_plans** en **dietary_requirements** (upsert, dus
+  opnieuw invullen overschrijft het vorige antwoord); zet
+  `participants.onboarding_status = 'voltooid'` en
+  `participant_invites.status = 'gebruikt'`.
+- **onboarding_forms/questions/answers** (organisator-specifieke extra vragen)
+  bestaan als tabellen maar hebben nog geen beheer-UI — bewust uitgesteld.
+
 ### Logistiek (`logistics_tables.sql`)
 - **travel_plans** — vervoerstype, vertrekplaats, luchthaven, vlucht, aankomst/vertrek,
   carpool aangeboden/gezocht.

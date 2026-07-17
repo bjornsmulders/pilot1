@@ -29,6 +29,16 @@ in de onboarding-slice (Module E) toegevoegd als een aparte, smalle policy per t
 ("alleen eigen rij, geldig token") — niet via `organization_members`.
 **Gevolg**: de permissions matrix in `docs/security.md` gaat over stafrollen; de
 participant-toegang wordt daar apart beschreven, niet als vijfde kolom.
+**Vervolg (module E, implementatie)**: in plaats van de hier oorspronkelijk
+geschetste "eigen, smalle RLS-policy per tabel" is de self-service-toegang
+uiteindelijk gebouwd als een paar `SECURITY DEFINER`-functies
+(`preview_onboarding_invite`, `submit_onboarding` in
+`supabase/migrations/20260716180000_participant_onboarding.sql`) die het token
+zelf hashen/valideren — hetzelfde patroon als `submit_public_lead`,
+`submit_public_review` en `accept_invitation` elders in deze pilot. Er is dus
+géén publieke SELECT/INSERT-policy op `travel_plans`/`dietary_requirements`
+voor `anon`; de functie is de enige geautoriseerde weg. Consistenter met de
+rest van de codebase en makkelijker te auditeren dan losse policies per tabel.
 
 ## ADR-0003 — Organisatie aanmaken via `SECURITY DEFINER`-functie, geen directe INSERT
 
