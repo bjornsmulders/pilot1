@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
-import { getPublicOrganization } from "@/lib/data/organizations";
+import { getPublicOrganization, getOrganizationReviewStats } from "@/lib/data/organizations";
 import { listPublicRetreats } from "@/lib/data/retreats";
 import { PublicRetreatCard } from "@/components/retreats/public-retreat-card";
+import { StarRating } from "@/components/reviews/star-rating";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,10 @@ export default async function PublicOrganizationPage({
     notFound();
   }
 
-  const retreats = await listPublicRetreats(orgSlug);
+  const [retreats, reviewStats] = await Promise.all([
+    listPublicRetreats(orgSlug),
+    getOrganizationReviewStats(orgSlug),
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,6 +59,15 @@ export default async function PublicOrganizationPage({
           )}
           <div>
             <h1 className="text-3xl font-semibold text-foreground">{organization.name}</h1>
+            {reviewStats.review_count > 0 && (
+              <div className="mt-1 flex items-center gap-1.5">
+                <StarRating rating={Math.round(reviewStats.average_rating ?? 0)} />
+                <span className="text-sm text-muted-foreground">
+                  {Number(reviewStats.average_rating).toFixed(1)} van 5 — {reviewStats.review_count}{" "}
+                  {reviewStats.review_count === 1 ? "review" : "reviews"} over alle retreats
+                </span>
+              </div>
+            )}
             {organization.website && (
               <a
                 href={organization.website}

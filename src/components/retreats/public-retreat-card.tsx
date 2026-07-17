@@ -4,6 +4,7 @@ import { MapPin, CalendarDays } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { RetreatStatusBadge } from "@/components/retreats/retreat-status-badge";
+import { StarRating } from "@/components/reviews/star-rating";
 import { formatCurrencyEUR, formatDateRange } from "@/lib/format";
 import type { PublicRetreatListingRow } from "@/lib/supabase/database.types";
 
@@ -41,6 +42,14 @@ export function PublicRetreatCard({
           </div>
           {showOrganizer && (
             <p className="text-xs text-muted-foreground">{retreat.organization_name}</p>
+          )}
+          {retreat.review_count > 0 && (
+            <div className="flex items-center gap-1.5">
+              <StarRating rating={Math.round(retreat.average_rating ?? 0)} />
+              <span className="text-xs text-muted-foreground">
+                {Number(retreat.average_rating).toFixed(1)} ({retreat.review_count})
+              </span>
+            </div>
           )}
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <CalendarDays className="h-3.5 w-3.5" />

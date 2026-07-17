@@ -25,6 +25,7 @@ const PUBLIC_PATHS = [
   "/retreat",
   "/ontdek",
   "/o",
+  "/deelnemer",
 ];
 
 function isPublicPath(pathname: string) {

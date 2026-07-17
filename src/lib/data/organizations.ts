@@ -67,6 +67,17 @@ export async function getPublicOrganization(orgSlug: string) {
   return data?.[0] ?? null;
 }
 
+/** Geaggregeerde reviewscore over alle retreats van een organisator heen. */
+export async function getOrganizationReviewStats(orgSlug: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_organization_review_stats", {
+    org_slug: orgSlug,
+  });
+
+  if (error) throw error;
+  return data?.[0] ?? { average_rating: null, review_count: 0 };
+}
+
 export interface PendingInvitationRow {
   id: string;
   email: string;

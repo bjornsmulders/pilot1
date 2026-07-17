@@ -6,10 +6,12 @@ import { getActiveMembership, getCurrentUser } from "@/lib/auth/session";
 import { getParticipant } from "@/lib/data/participants";
 import { listRetreatOptions } from "@/lib/data/retreats";
 import { listPayments } from "@/lib/data/payments";
+import { listMessageTemplates } from "@/lib/data/messages";
 import { canManageRetreat } from "@/lib/auth/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { updateParticipantAction } from "@/actions/participants";
 import { registerManualPaymentAction } from "@/actions/payments";
+import { issueParticipantInviteAction } from "@/actions/participant-invites";
 import { ParticipantForm } from "@/components/participants/participant-form";
 import {
   BookingStatusBadge,
@@ -17,7 +19,9 @@ import {
 } from "@/components/participants/participant-status-badges";
 import { PaymentList } from "@/components/payments/payment-list";
 import { RegisterPaymentForm } from "@/components/payments/register-payment-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { IssueInviteForm } from "@/components/participants/issue-invite-form";
+import { MessageComposer } from "@/components/messages/message-composer";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Deelnemer — JourneyOS" };
 export const dynamic = "force-dynamic";
@@ -34,10 +38,12 @@ export default async function ParticipantDetailPage({
   const participant = await getParticipant(membership.organizationId, participantId);
   if (!participant) notFound();
 
-  const [retreats, user] = await Promise.all([
+  const [retreats, user, templates] = await Promise.all([
     listRetreatOptions(membership.organizationId),
     getCurrentUser(),
+    listMessageTemplates(membership.organizationId),
   ]);
+  const retreatTitle = retreats.find((r) => r.id === participant.retreat_id)?.title ?? null;
 
   let canManage = membership.role === "owner" || membership.role === "admin";
   if (!canManage && membership.role === "coordinator" && user) {
@@ -53,6 +59,11 @@ export default async function ParticipantDetailPage({
 
   const boundAction = updateParticipantAction.bind(null, membership.organizationId, participantId);
   const boundPaymentAction = registerManualPaymentAction.bind(
+    null,
+    membership.organizationId,
+    participantId
+  );
+  const boundInviteAction = issueParticipantInviteAction.bind(
     null,
     membership.organizationId,
     participantId
@@ -90,12 +101,38 @@ export default async function ParticipantDetailPage({
       </div>
 
       {canManage ? (
-        <ParticipantForm
-          action={boundAction}
-          participant={participant}
-          retreats={retreats}
-          submitLabel="Wijzigingen opslaan"
-        />
+        <>
+          <ParticipantForm
+            action={boundAction}
+            participant={participant}
+            retreats={retreats}
+            submitLabel="Wijzigingen opslaan"
+          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Onboarding</CardTitle>
+              <CardDescription>
+                Stuur een persoonlijke link waarmee {participant.full_name} reisgegevens en
+                dieetwensen kan doorgeven — geen account nodig.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IssueInviteForm
+                action={boundInviteAction}
+                participantName={participant.full_name}
+                participantPhone={participant.phone}
+              />
+            </CardContent>
+          </Card>
+          <MessageComposer
+            organizationId={membership.organizationId}
+            target={{ type: "participant", id: participantId }}
+            templates={templates}
+            recipientName={participant.full_name}
+            recipientPhone={participant.phone}
+            retreatTitle={retreatTitle}
+          />
+        </>
       ) : (
         <p className="text-sm text-muted-foreground">
           Je hebt alleen leestoegang tot deze deelnemer.

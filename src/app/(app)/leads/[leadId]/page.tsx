@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getActiveMembership, getCurrentUser } from "@/lib/auth/session";
 import { getLead, listLeadActivities } from "@/lib/data/leads";
 import { listRetreatOptions } from "@/lib/data/retreats";
+import { listMessageTemplates } from "@/lib/data/messages";
 import { canManageRetreat } from "@/lib/auth/permissions";
 import { createClient } from "@/lib/supabase/server";
 import { updateLeadAction } from "@/actions/leads";
@@ -11,6 +12,7 @@ import { LeadForm } from "@/components/leads/lead-form";
 import { LeadActivityLog } from "@/components/leads/lead-activity-log";
 import { ConvertToParticipantDialog } from "@/components/leads/convert-to-participant-dialog";
 import { LeadStatusBadge } from "@/components/leads/lead-status-badge";
+import { MessageComposer } from "@/components/messages/message-composer";
 
 export const metadata: Metadata = { title: "Lead — JourneyOS" };
 export const dynamic = "force-dynamic";
@@ -27,11 +29,13 @@ export default async function LeadDetailPage({
   const lead = await getLead(membership.organizationId, leadId);
   if (!lead) notFound();
 
-  const [activities, retreats, user] = await Promise.all([
+  const [activities, retreats, user, templates] = await Promise.all([
     listLeadActivities(membership.organizationId, leadId),
     listRetreatOptions(membership.organizationId),
     getCurrentUser(),
+    listMessageTemplates(membership.organizationId),
   ]);
+  const retreatTitle = retreats.find((r) => r.id === lead.retreat_id)?.title ?? null;
 
   let canManage = membership.role === "owner" || membership.role === "admin";
   if (!canManage && lead.retreat_id && membership.role === "coordinator" && user) {
@@ -68,6 +72,17 @@ export default async function LeadDetailPage({
         <LeadForm action={boundAction} lead={lead} retreats={retreats} submitLabel="Wijzigingen opslaan" />
       ) : (
         <p className="text-sm text-muted-foreground">Je hebt alleen leestoegang tot deze lead.</p>
+      )}
+
+      {canManage && (
+        <MessageComposer
+          organizationId={membership.organizationId}
+          target={{ type: "lead", id: leadId }}
+          templates={templates}
+          recipientName={lead.name}
+          recipientPhone={lead.phone}
+          retreatTitle={retreatTitle}
+        />
       )}
 
       <LeadActivityLog

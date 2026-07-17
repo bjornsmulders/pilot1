@@ -231,6 +231,22 @@ export type ParticipantConsentRow = {
   created_at: string;
 };
 
+export type ParticipantInviteRow = {
+  id: string;
+  participant_id: string;
+  organization_id: string;
+  token_hash: string;
+  status: "actief" | "gebruikt" | "verlopen" | "ingetrokken";
+  expires_at: string;
+  issued_by: string | null;
+  issued_at: string;
+  used_at: string | null;
+  revoked_at: string | null;
+  request_count: number;
+  last_request_at: string | null;
+  created_at: string;
+};
+
 export type AlumniMembershipRow = {
   id: string;
   organization_id: string;
@@ -358,6 +374,8 @@ export type PublicRetreatListingRow = {
   price_per_person: number;
   cover_image_url: string | null;
   status: RetreatStatus;
+  average_rating: number | null;
+  review_count: number;
 };
 
 export type PublicOrganizationRow = {
@@ -366,6 +384,31 @@ export type PublicOrganizationRow = {
   slug: string;
   logo_url: string | null;
   website: string | null;
+};
+
+export type OrganizationReviewStatsRow = {
+  average_rating: number | null;
+  review_count: number;
+};
+
+export type OnboardingPreviewRow = {
+  participant_full_name: string;
+  retreat_title: string;
+  retreat_location: string | null;
+  retreat_start_date: string;
+  retreat_end_date: string;
+  travel_transport_type: "vliegtuig" | "auto" | "trein" | "anders" | null;
+  travel_departure_location: string | null;
+  travel_airport: string | null;
+  travel_flight_number: string | null;
+  travel_arrival_time: string | null;
+  travel_departure_time: string | null;
+  travel_carpool_offered: boolean | null;
+  travel_carpool_requested: boolean | null;
+  travel_notes: string | null;
+  diet_type: string | null;
+  diet_allergies: string | null;
+  diet_other_notes: string | null;
 };
 
 export type PlatformMatchingCandidateRow = {
@@ -442,6 +485,7 @@ export type Database = {
       schedule_items: TableDef<ScheduleItemRow>;
       announcements: TableDef<AnnouncementRow>;
       reviews: TableDef<ReviewRow>;
+      participant_invites: TableDef<ParticipantInviteRow>;
       alumni_memberships: TableDef<AlumniMembershipRow>;
       message_templates: TableDef<MessageTemplateRow>;
       message_deliveries: TableDef<MessageDeliveryRow>;
@@ -524,6 +568,32 @@ export type Database = {
       list_public_reviews: {
         Args: { retreat_public_slug: string };
         Returns: PublicReviewRow[];
+      };
+      get_organization_review_stats: {
+        Args: { org_slug: string };
+        Returns: OrganizationReviewStatsRow[];
+      };
+      preview_onboarding_invite: {
+        Args: { invite_token: string };
+        Returns: OnboardingPreviewRow[];
+      };
+      submit_onboarding: {
+        Args: {
+          invite_token: string;
+          transport_type: string | null;
+          departure_location: string | null;
+          airport: string | null;
+          flight_number: string | null;
+          arrival_time: string | null;
+          departure_time: string | null;
+          carpool_offered: boolean;
+          carpool_requested: boolean;
+          travel_notes: string | null;
+          diet_type: string | null;
+          diet_allergies: string | null;
+          diet_other_notes: string | null;
+        };
+        Returns: undefined;
       };
     };
   };
